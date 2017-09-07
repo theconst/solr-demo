@@ -1,20 +1,28 @@
 package org.demo.pojo;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import org.apache.solr.client.solrj.beans.Field;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.solr.core.mapping.Indexed;
+import org.springframework.data.solr.core.mapping.SolrDocument;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SolrDocument(solrCoreName = "wikipedia")
 public class Article {
 
-    @Field
+    @Id
+    @Indexed(name = "fileName")
     private String fileName;
 
-    @Field("title")
-    private List<String> titles;
+    @Indexed(name = "title")
+    private String title;
 
-    //TODO: add handling of content
-    @Field("content")
+    @Indexed(name = "content")
     private String content;
 }

@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
-@Component
+//@Component
 public class ConversionServiceFactoryBean implements FactoryBean<ConversionService> {
 
     private final Collection<? extends Converter<?, ?>> converters;

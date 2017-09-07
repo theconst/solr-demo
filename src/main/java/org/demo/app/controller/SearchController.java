@@ -1,40 +1,40 @@
 package org.demo.app.controller;
 
-import org.demo.app.facade.ArticleCollectionFacade;
+import lombok.extern.slf4j.Slf4j;
+import org.demo.app.service.ArticleService;
 import org.demo.pojo.Article;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.StreamSupport.stream;
 
 @Component
+@Slf4j
 public class SearchController implements ActionListener {
 
     private final JTextField searchField;
-
-    private final JButton searchButton;
-    private final ArticleCollectionFacade facade;
-
     private final JTextArea resultsArea;
-    private final String collectionName;
+    private final JButton searchButton;
+
+    private final ArticleService facade;
 
     @Autowired
     public SearchController(JTextField searchField,
                             @Qualifier("searchSubmitButton") JButton searchButton,
                             JTextArea resultsArea,
-                            ArticleCollectionFacade facade,
-                            @Value("${collection.name?:wikipedia}") String collectionName) {
+                            ArticleService facade) {
         this.searchField = searchField;
         this.searchButton = searchButton;
         this.facade = facade;
         this.resultsArea = resultsArea;
-        this.collectionName = collectionName;
     }
 
     @PostConstruct
@@ -45,12 +45,20 @@ public class SearchController implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String text = searchField.getText();
-        List<Article> result = facade.searchForBeansInCollection(collectionName, text, Article.class);
 
-        resultsArea.setText("Found in article:"
-                + result.stream()
-                .findFirst()
-                .map(Article::getFileName)
-                .orElse(""));
+        //TODO: add more sophisticated searchForArticles methods
+        facade.searchForArticles(text).addCallback(
+                articles -> resultsArea.setText(stream(articles.spliterator(), false)
+                        .map(this::prettyPrintArticle)
+                        .collect(joining("\n\n"))),
+                ex -> {
+                    log.error("Error during searchForArticles", ex);
+                    resultsArea.setText("ERROR");
+                }
+        );
+    }
+
+    private String prettyPrintArticle(Article article) {
+        return format("Title:%s%nContents:%n%s%n", article.getTitle(), article.getContent());
     }
 }
