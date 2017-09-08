@@ -30,10 +30,10 @@ public class SearchController implements ActionListener {
     public SearchController(JTextField searchField,
                             @Qualifier("searchSubmitButton") JButton searchButton,
                             JTextArea resultsArea,
-                            ArticleService facade) {
+                            ArticleService service) {
         this.searchField = searchField;
         this.searchButton = searchButton;
-        this.facade = facade;
+        this.facade = service;
         this.resultsArea = resultsArea;
     }
 
@@ -44,18 +44,19 @@ public class SearchController implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String text = searchField.getText();
-
-        //TODO: add more sophisticated searchForArticles methods
-        facade.searchForArticles(text).addCallback(
-                articles -> resultsArea.setText(stream(articles.spliterator(), false)
+        final String text = searchField.getText();
+        facade.searchForArticles(
+                articles -> {
+                    log.info(format("Successfully searched for %s", text));
+                    resultsArea.setText(stream(articles.spliterator(), false)
                         .map(this::prettyPrintArticle)
-                        .collect(joining("\n\n"))),
+                        .collect(joining("\n\n")));
+                },
                 ex -> {
                     log.error("Error during searchForArticles", ex);
                     resultsArea.setText("ERROR");
-                }
-        );
+                },
+                text);
     }
 
     private String prettyPrintArticle(Article article) {

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SuccessCallback;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class ArticleService {
         List<Article> articles = new ArrayList<>(files.length);
         for (File file : files) {
             if (file.isDirectory()) {
-                getService().addArticleFiles(successCallback, failureCallback, file.listFiles());     //todo: refactor to loop
+                self().addArticleFiles(successCallback, failureCallback, file.listFiles());
             } else {
                 try {
                     articles.add(Article.builder()
@@ -64,12 +63,13 @@ public class ArticleService {
         }
     }
 
-    public ListenableFuture<? extends Iterable<Article>> searchForArticles(String queryString) {
-        return repository.findByContent(queryString);
+    public void searchForArticles(SuccessCallback<Iterable<Article>> successCallback, FailureCallback failureCallback, String queryString) {
+        repository.findByContent(queryString)
+                .addCallback(successCallback, failureCallback);
     }
 
     @Lookup
-    private ArticleService getService() {
+    private ArticleService self() {
         return null;
     }
 }
