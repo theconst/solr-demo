@@ -10,20 +10,25 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static java.lang.String.format;
+
 @Component
 public class UploadController implements ActionListener {
 
     private final JFileChooser fileChooser;
-    private JButton openButton;
+    private final JButton openButton;
     private final ArticleService controller;
+    private final JLabel statusBar;
 
     @Autowired
     public UploadController(JFileChooser fileChooser,
                             @Qualifier("openFileChooserButton") JButton openButton,
+                            @Qualifier("statusBar") JLabel statusBar,
                             ArticleService facade) {
         this.fileChooser = fileChooser;
         this.openButton = openButton;
         this.controller = facade;
+        this.statusBar = statusBar;
     }
 
     @PostConstruct
@@ -36,7 +41,10 @@ public class UploadController implements ActionListener {
         int status = fileChooser.showOpenDialog(null);
 
         if (status == JFileChooser.APPROVE_OPTION) {
-            controller.addFiles(fileChooser.getSelectedFiles());
+            controller.addArticleFiles(
+                    article -> statusBar.setText(format("Article %s was successfully submitted", article.getTitle())),
+                    ex -> statusBar.setText(format("Error! %s", ex.getMessage())),
+                    fileChooser.getSelectedFiles());
         }
     }
 }

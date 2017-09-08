@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SuccessCallback;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,19 +27,20 @@ public class ArticleService {
 
     private static final Charset CHARSET = Charset.defaultCharset();
 
-    private final ArticleRepository repostitory;
+    private final ArticleRepository repository;
 
     @Autowired
     public ArticleService(ArticleRepository solrService) {
-        this.repostitory = solrService;
+        this.repository = solrService;
     }
 
     @Async
-    public void addFiles(File... files) {
+    public void addArticleFiles(SuccessCallback<? super Article> successCallback,
+                                FailureCallback failureCallback, File... files) {
         List<Article> articles = new ArrayList<>(files.length);
         for (File file : files) {
             if (file.isDirectory()) {
-                getService().addFiles(file.listFiles());     //todo: refactor to loop
+                getService().addArticleFiles(successCallback, failureCallback, file.listFiles());     //todo: refactor to loop
             } else {
                 try {
                     articles.add(Article.builder()
@@ -46,24 +49,27 @@ public class ArticleService {
                             .title(file.getName())
                             .build());
                 } catch (IOException ex) {
+                    failureCallback.onFailure(ex);
                     log.info("Error reading file", ex);
                 }
             }
         }
         try {
-            repostitory.saveAll(articles);
+            repository.saveAll(articles);
+            articles.forEach(successCallback::onSuccess);
             log.info(format("Files %s were successfully added", Arrays.toString(files)));
         } catch (Exception ex) {
+            failureCallback.onFailure(ex);
             log.info(format("Failed to submit files: %s", files));
         }
     }
 
     public ListenableFuture<? extends Iterable<Article>> searchForArticles(String queryString) {
-        return repostitory.findByContent(queryString);
+        return repository.findByContent(queryString);
     }
 
     @Lookup
-    public ArticleService getService() {
+    private ArticleService getService() {
         return null;
     }
 }

@@ -33,7 +33,7 @@ public class ArticleServiceIntegrationTest extends AbstractSolrIntegrationTest {
     @Test
     public void shouldAddDocumentToSolrServerForFiles() throws Exception {
         File[] files = ARTICLES.getFile().listFiles();
-        articleService.addFiles(files);
+        articleService.addArticleFiles(a -> {}, ex -> {}, files);
 
         assertThat(articleRepository.findAll())
             .hasSize(files.length);
@@ -42,7 +42,7 @@ public class ArticleServiceIntegrationTest extends AbstractSolrIntegrationTest {
     @Test
     public void shouldAddDocumentToSolrServerForDirectories() throws Exception {
         File articleDirectory = ARTICLES.getFile();
-        articleService.addFiles(articleDirectory);
+        articleService.addArticleFiles(a -> {}, ex -> {}, articleDirectory);
 
         assertThat(articleRepository.findAll())
                 .hasSize(articleDirectory.listFiles().length);
