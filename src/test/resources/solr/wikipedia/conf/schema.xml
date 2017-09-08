@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="wikipedia" version="1.6">
+    <!-- manual schema definition -->
+    <field name="fileName" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <uniqueKey>fileName</uniqueKey>
+
+    <field name="title" type="string" indexed="true" stored="true" />
+    <field name="content" type="htmlDoc" indexed="true" stored="true" required="true" multiValued="false" />
+
+    <!-- doc values are enabled by default for primitive types such as long so we don't index the version field  -->
+    <field name="_version_" type="long" indexed="false" stored="false"/>
+
+    <!-- manually defined stripped content -->
+    <fieldType name="htmlDoc" class="solr.TextField">
+        <analyzer type="index">
+            <charFilter class="solr.HTMLStripCharFilterFactory" />
+            <tokenizer class="solr.StandardTokenizerFactory" />
+            <filter class="solr.EnglishMinimalStemFilterFactory" />
+            <filter class="solr.EnglishPossessiveFilterFactory" />
+            <filter class="solr.LowerCaseFilterFactory" />
+            <filter class="solr.StopFilterFactory" />
+        </analyzer>
+        <analyzer type="query">
+            <charFilter class="solr.HTMLStripCharFilterFactory" />
+            <tokenizer class="solr.LowerCaseTokenizerFactory" />
+        </analyzer>
+    </fieldType>
+
+    <!-- simple string field type -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true" />
+
+    <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0" />
+
+    <!--
+     <similarity class="com.example.solr.CustomSimilarityFactory">
+       <str name="paramkey">param value</str>
+     </similarity>
+    -->
+
+</schema>
