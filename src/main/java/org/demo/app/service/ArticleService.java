@@ -22,7 +22,7 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 
 @Component
 @Slf4j
-public class ArticleService {
+abstract public class ArticleService {
 
     private static final Charset CHARSET = Charset.defaultCharset();
 
@@ -69,7 +69,5 @@ public class ArticleService {
     }
 
     @Lookup
-    private ArticleService self() {
-        return null;
-    }
+    abstract protected ArticleService self();
 }

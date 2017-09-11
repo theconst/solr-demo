@@ -7,6 +7,8 @@ import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 
+import static javax.swing.SwingConstants.BOTTOM;
+
 @Component("mainFrame")
 public class MainFrame extends JFrame {
 
@@ -16,18 +18,21 @@ public class MainFrame extends JFrame {
     private final JButton searchButton;
     private final JButton fileChooserButton;
     private final GuiConfigurationProperties properties;
+    private final JLabel statusBar;
 
     public MainFrame(@Qualifier("flowLayout") LayoutManager layout,
                      @Qualifier("searchScrollPane") JScrollPane searchResultsPane,
                      @Qualifier("searchField") JTextField searchBox,
                      @Qualifier("searchSubmitButton") JButton searchButton,
                      @Qualifier("openFileChooserButton") JButton fileChooserButton,
+                     @Qualifier("statusBar") JLabel statusBar,
                      GuiConfigurationProperties properties) {
         this.layout = layout;
         this.searchResultsPane = searchResultsPane;
         this.searchBox = searchBox;
         this.searchButton = searchButton;
         this.fileChooserButton = fileChooserButton;
+        this.statusBar = statusBar;
         this.properties = properties;
     }
 
@@ -39,6 +44,10 @@ public class MainFrame extends JFrame {
         add(searchButton);
         add(fileChooserButton);
         add(searchResultsPane);
+        add(statusBar);
+
+        statusBar.setVerticalAlignment(BOTTOM);
+        statusBar.setPreferredSize(new Dimension(200, 10));
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 

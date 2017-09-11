@@ -1,6 +1,5 @@
 package org.demo.app.view;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -55,6 +54,11 @@ public class GuiElementsConfig {
         JTextArea textArea = new JTextArea();
 
         return textArea;
+    }
+
+    @Bean("statusBar")
+    public JLabel statusBar() {
+        return new JLabel();
     }
 
     @Bean("searchScrollPane")

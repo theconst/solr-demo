@@ -17,17 +17,17 @@ public class UploadController implements ActionListener {
 
     private final JFileChooser fileChooser;
     private final JButton openButton;
-    private final ArticleService controller;
+    private final ArticleService service;
     private final JLabel statusBar;
 
     @Autowired
     public UploadController(JFileChooser fileChooser,
                             @Qualifier("openFileChooserButton") JButton openButton,
                             @Qualifier("statusBar") JLabel statusBar,
-                            ArticleService facade) {
+                            ArticleService service) {
         this.fileChooser = fileChooser;
         this.openButton = openButton;
-        this.controller = facade;
+        this.service = service;
         this.statusBar = statusBar;
     }
 
@@ -41,7 +41,7 @@ public class UploadController implements ActionListener {
         int status = fileChooser.showOpenDialog(null);
 
         if (status == JFileChooser.APPROVE_OPTION) {
-            controller.addArticleFiles(
+            service.addArticleFiles(
                     article -> statusBar.setText(format("Article %s was successfully submitted", article.getTitle())),
                     ex -> statusBar.setText(format("Error! %s", ex.getMessage())),
                     fileChooser.getSelectedFiles());
