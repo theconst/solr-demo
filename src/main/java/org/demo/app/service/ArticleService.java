@@ -1,6 +1,7 @@
 package org.demo.app.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.demo.parser.ArticleParser;
 import org.demo.pojo.Article;
 import org.demo.solr.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,25 +13,26 @@ import org.springframework.util.concurrent.SuccessCallback;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.apache.commons.io.FileUtils.readFileToString;
 
 @Component
 @Slf4j
 abstract public class ArticleService {
 
-    private static final Charset CHARSET = Charset.defaultCharset();
-
     private final ArticleRepository repository;
+    private ArticleParser parser;
+    private FileReader reader;
 
     @Autowired
-    public ArticleService(ArticleRepository solrService) {
+    public ArticleService(ArticleRepository solrService, ArticleParser parser, FileReader reader) {
         this.repository = solrService;
+        this.parser = parser;
+        this.reader = reader;
     }
 
     @Async
@@ -42,24 +44,25 @@ abstract public class ArticleService {
                 self().addArticleFiles(successCallback, failureCallback, file.listFiles());
             } else {
                 try {
-                    articles.add(Article.builder()
-                            .content(readFileToString(file, CHARSET))
-                            .fileName(file.getName())
-                            .title(file.getName())
-                            .build());
+                    String articleString = reader.readFileToString(file);
+                    Article article = parser.parse(articleString);
+                    article.setFileName(file.getName());
+                    article.setCreatedAt(LocalDateTime.now());
+                    articles.add(article);
                 } catch (IOException ex) {
                     failureCallback.onFailure(ex);
-                    log.info("Error reading file", ex);
+                    log.info("Error reading file ", ex);
                 }
             }
         }
-        try {
-            repository.saveAll(articles);
-            articles.forEach(successCallback::onSuccess);
-            log.info(format("Files %s were successfully added", Arrays.toString(files)));
-        } catch (Exception ex) {
-            failureCallback.onFailure(ex);
-            log.info(format("Failed to submit files: %s", files));
+        if (!articles.isEmpty()) {
+            try {
+                repository.saveAll(articles).forEach(successCallback::onSuccess);
+                log.info(format("Files %s were successfully added", Arrays.toString(files)));
+            } catch (Exception ex) {
+                failureCallback.onFailure(ex);
+                log.info(format("Failed to submit files: %s", files));
+            }
         }
     }
 
