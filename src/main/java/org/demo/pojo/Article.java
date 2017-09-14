@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "score")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @SolrDocument(solrCoreName = "wikipedia")
 public class Article {
 
@@ -30,7 +30,7 @@ public class Article {
     @Indexed(name = "title_txt", required = true)
     private String title;
 
-    @Indexed(name = "title_txt", required = true)
+    @Indexed(name = "content_txt", required = true)
     private String content;
 
     @Indexed(name = "attr_categories")

@@ -19,6 +19,7 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.demo.resources.ArticlePrototypes.anArticle;
 import static org.demo.resources.ArticleResources.ARTICLE_DIRECTORY;
 import static org.demo.resources.ArticleResources.ARTICLE_FILES;
 
@@ -39,7 +40,7 @@ public class ArticleServiceIntegrationTest extends AbstractSolrIntegrationTest {
 
     @Test
     public void shouldAddDocumentToSolrServerForFiles() throws Exception {
-        final AtomicInteger callbacksMade = new AtomicInteger();
+        final AtomicInteger callbacksMade = new AtomicInteger();    //used as holder
         File[] files = ARTICLE_DIRECTORY.listFiles();
         articleService.addArticleFiles(a -> callbacksMade.incrementAndGet(), ex -> fail(ex.getMessage()), files);
 
@@ -78,15 +79,13 @@ public class ArticleServiceIntegrationTest extends AbstractSolrIntegrationTest {
 
     @Test
     public void shouldSearchByContent() throws Exception {
-        Article article = Article.builder()
-                    .fileName("fname")
-                    .title("title")
-                    .content("content")
-                    .build();
+        Article article = anArticle();
+        article.setContent("content");
 
         articleRepository.save(article);
 
         assertThat(articleRepository.findByContent("content").get())
+                .usingElementComparatorIgnoringFields("score")
                 .isEqualTo(singletonList(article));
     }
 
@@ -95,20 +94,16 @@ public class ArticleServiceIntegrationTest extends AbstractSolrIntegrationTest {
         final AtomicInteger callbacksMade = new AtomicInteger(0);
         articleService.addArticleFiles(a -> callbacksMade.incrementAndGet(), ex -> fail(ex.getMessage()), ARTICLE_DIRECTORY);
 
-        Article article = Article.builder()
-                .title("Processor Technology")
-                .content("Processor Technology")
-                .fileName("fname")
-                .build();
+        Article article = anArticle("fname");
+        article.setTitle("Processor Technology");
+        article.setContent("Processor Technology");
+        article.setCategories(null);
 
         articleRepository.save(article);
 
+        Optional<Article> classifiedArticle = articleRepository.findById("fname");
 
-        Optional<Article> classiffiedArticle = articleRepository.findById("fname");
-
-        assertThat(classiffiedArticle)
-                .isPresent();
-
-        assertThat(classiffiedArticle.get().getCategories()).isNotEmpty();
+        assertThat(classifiedArticle).isPresent();
+        assertThat(classifiedArticle.get().getCategories()).isNotEmpty();
     }
 }

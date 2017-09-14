@@ -1055,20 +1055,17 @@
     </requestHandler>
 
 
-    <!-- Request handler for classification -->
-    <requestHanlder name="/classify">
-        <lst name="defaults">
-            <str name="update.chain">classification</str>
-        </lst>
-    </requestHanlder>
+    <!--&lt;!&ndash; Request handler for classification &ndash;&gt;--> misunderstaning
+    <!--<requestHanlder name="/classify">-->
+        <!--<lst name="defaults">-->
+            <!--<str name="update.chain">classification</str>-->
+        <!--</lst>-->
+    <!--</requestHanlder>-->
 
-    <updateRequestProcessorChain name="classification">
-        <processor class="solr.ClassificationUpdateProcessorFactory">
-            <str name="inputFields">title_txt^1.5,content_txt</str>
-            <str name="classField">attr_categories</str>
-            <str name="algorithm">bayes</str>
-        </processor>
-    </updateRequestProcessorChain>
+    <!--<updateRequestProcessorChain name="classification">-->
+        <!---->
+        <!--<processor class="solr.RunUpdateProcessorFactory" />-->
+    <!--</updateRequestProcessorChain>-->
 
     <!-- Highlighting Component
 
@@ -1251,6 +1248,14 @@
                 <str name="fieldType">tdoubles</str>
             </lst>
         </processor>
+
+        <!--temporary stub -->
+        <processor class="solr.ClassificationUpdateProcessorFactory">
+            <str name="inputFields">title_txt^1.5,content_txt</str>
+            <str name="classField">attr_categories</str>
+            <str name="algorithm">bayes</str>
+        </processor>
+
         <processor class="solr.LogUpdateProcessorFactory"/>
         <processor class="solr.DistributedUpdateProcessorFactory"/>
         <processor class="solr.RunUpdateProcessorFactory"/>
