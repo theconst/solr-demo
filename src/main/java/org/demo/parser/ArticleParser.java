@@ -23,7 +23,7 @@ public class ArticleParser {
                 .map(Element::html)
                 .orElse("untitled");
 
-        String content = Optional.of(articleDocument.getElementById("bodyContent"))
+        String content = Optional.ofNullable(articleDocument.getElementById("bodyContent"))
                 .map(Element::html)
                 .orElse(articleDocument.html());
 
